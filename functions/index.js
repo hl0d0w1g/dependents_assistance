@@ -5,14 +5,9 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//     response.send("Hello from Firebase!");
-// });
+// Get a reference to the database service
+const database = admin.database();
 
-// See https://github.com/dialogflow/dialogflow-fulfillment-nodejs
-// for Dialogflow fulfillment library docs, samples, and to report issues
 'use strict';
 
 const { WebhookClient } = require('dialogflow-fulfillment');
@@ -32,6 +27,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function fallback(agent) {
         agent.add(`I didn't understand`);
         agent.add(`I'm sorry, can you try again?`);
+    }
+
+    function checkHouseTemperature(agent) {
+        return database.ref('temperature').once('value', (snapshot) => {
+            console.log(snapshot.val());
+            agent.add(`La temperatura es de ` + snapshot.val() + ' grados centigrados.');
+        });
     }
 
     // // Uncomment and edit to make your own intent handler
@@ -67,6 +69,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     let intentMap = new Map();
     intentMap.set('Default Welcome Intent', welcome);
     intentMap.set('Default Fallback Intent', fallback);
+    intentMap.set('Check House Temperature', checkHouseTemperature);
     // intentMap.set('your intent name here', yourFunctionHandler);
     // intentMap.set('your intent name here', googleAssistantHandler);
     agent.handleRequest(intentMap);
