@@ -3,10 +3,10 @@ import serial
 import time
 
 firebaseConfig = {
-  "apiKey": "AIzaSyAeAvqEBFqddnmKbVDmTDtjKAdKzGSzZm8",
-  "authDomain": "home-automation-42f17.firebaseapp.com",
-  "databaseURL": "https://home-automation-42f17.firebaseio.com",
-  "storageBucket": "home-automation-42f17.appspot.com"
+  "apiKey": "AIzaSyB8jcGwrAajBJR9pyBNqZ3y7xweeyAdZA8",
+  "authDomain": "dependentsassistant.firebaseapp.com",
+  "databaseURL": "https://dependentsassistant.firebaseio.com",
+  "storageBucket": "dependentsassistant.appspot.com"
 }
 
 firebase = pyrebase.initialize_app(firebaseConfig)
