@@ -10,6 +10,12 @@ Enter to the vitual enviroment
 source venv/bin/activate
 ```
 
+Exit virtual enviroment
+```
+deactivate
+```
+
+
 Create the requirements.txt
 ```
 pip freeze > requirements.txt
