@@ -20,19 +20,17 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
     console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
 
-    function welcome(agent) {
-        agent.add(`Welcome to my agent!`);
-    }
+    // Run the proper function handler based on the matched Dialogflow intent name
+    let intentMap = new Map();
+    intentMap.set('Check House Temperature', checkHouseTemperature);
+    // intentMap.set('your intent name here', yourFunctionHandler);
+    // intentMap.set('your intent name here', googleAssistantHandler);
+    agent.handleRequest(intentMap);
 
-    function fallback(agent) {
-        agent.add(`I didn't understand`);
-        agent.add(`I'm sorry, can you try again?`);
-    }
-
+    // Check the house temperature sensor on the database
     function checkHouseTemperature(agent) {
         return database.ref('temperature').once('value', (snapshot) => {
-            console.log(snapshot.val());
-            agent.add(`La temperatura es de ` + snapshot.val() + ' grados centigrados.');
+            agent.add('La temperatura es de ' + snapshot.val() + ' grados centigrados');
         });
     }
 
@@ -65,12 +63,4 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     // // See https://github.com/dialogflow/dialogflow-fulfillment-nodejs/tree/master/samples/actions-on-google
     // // for a complete Dialogflow fulfillment library Actions on Google client library v2 integration sample
 
-    // Run the proper function handler based on the matched Dialogflow intent name
-    let intentMap = new Map();
-    intentMap.set('Default Welcome Intent', welcome);
-    intentMap.set('Default Fallback Intent', fallback);
-    intentMap.set('Check House Temperature', checkHouseTemperature);
-    // intentMap.set('your intent name here', yourFunctionHandler);
-    // intentMap.set('your intent name here', googleAssistantHandler);
-    agent.handleRequest(intentMap);
 });
