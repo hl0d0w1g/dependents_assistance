@@ -1,0 +1,60 @@
+[
+  {
+    "id": "623d8de0-0da6-4308-8a60-16eaecdac801",
+    "data": [
+      {
+        "text": "Tengo ",
+        "userDefined": false
+      },
+      {
+        "text": "una",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      },
+      {
+        "text": " emergencia, necesito que me ayudes",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1542870521
+  },
+  {
+    "id": "227f2c92-1cd8-46ef-b5ef-bbfe6305c806",
+    "data": [
+      {
+        "text": "socorro",
+        "meta": "@sys.ignore",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1542870425
+  },
+  {
+    "id": "ce033f68-45ae-45c3-a257-75e46404fbfc",
+    "data": [
+      {
+        "text": "necesito ayuda",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1542870425
+  },
+  {
+    "id": "44c9589a-1be8-406a-b723-8f9a3a3b382b",
+    "data": [
+      {
+        "text": "ayuda",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1542870425
+  }
+]

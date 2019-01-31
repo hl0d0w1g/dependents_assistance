@@ -1,0 +1,28 @@
+{
+  "id": "89f49aa8-652a-4563-b660-9d8273e5963b",
+  "name": "Agent Name",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "es",
+          "speech": "Mi nombre es Dialogflow"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1541865399,
+  "fallbackIntent": false,
+  "events": []
+}

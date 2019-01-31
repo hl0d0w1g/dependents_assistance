@@ -1,0 +1,28 @@
+{
+  "id": "1198cb50-9808-4b1a-907a-ba84f250acb5",
+  "name": "Check House Humidity",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "es",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1548663226,
+  "fallbackIntent": false,
+  "events": []
+}

@@ -1,0 +1,28 @@
+{
+  "id": "8877544b-2b89-4a56-a525-7e6691c730b1",
+  "name": "Emergency",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "es",
+          "speech": "¿En que te puedo ayudar?"
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1548065943,
+  "fallbackIntent": false,
+  "events": []
+}

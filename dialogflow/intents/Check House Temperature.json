@@ -1,0 +1,30 @@
+{
+  "id": "65e3cd6b-7658-4992-91fd-aa8bf1f72d16",
+  "name": "Check House Temperature",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "es",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {
+        "google": false
+      },
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1548505982,
+  "fallbackIntent": false,
+  "events": []
+}
