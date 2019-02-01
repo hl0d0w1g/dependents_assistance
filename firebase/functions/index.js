@@ -23,14 +23,20 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     // Run the proper function handler based on the matched Dialogflow intent name
     let intentMap = new Map();
     intentMap.set('Check House Temperature', checkHouseTemperature);
-    // intentMap.set('your intent name here', yourFunctionHandler);
-    // intentMap.set('your intent name here', googleAssistantHandler);
+    intentMap.set('Check House Humidity', checkHouseHumidity);
     agent.handleRequest(intentMap);
 
     // Check the house temperature sensor on the database
     function checkHouseTemperature(agent) {
-        return database.ref('temperature').once('value', (snapshot) => {
-            agent.add('La temperatura es de ' + snapshot.val() + ' grados centigrados');
+        return database.ref('sensorData/temperature').once('value', (snapshot) => {
+            agent.add('La temperatura es de ' + snapshot.val().measure + ' ' + snapshot.val().units);
+        });
+    }
+
+    // Check the house humidity sensor on the database
+    function checkHouseHumidity(agent) {
+        return database.ref('sensorData/humidity').once('value', (snapshot) => {
+            agent.add(setHumidityExpresion(snapshot.val().measure, snapshot.val().units));
         });
     }
 
@@ -64,3 +70,20 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     // // for a complete Dialogflow fulfillment library Actions on Google client library v2 integration sample
 
 });
+
+// Converts the symbol of the units into the expression of the language
+function setHumidityExpresion(measure, units) {
+    switch (units) {
+        case 'AH':
+            return 'La humedad absoluta es de ' + measure + ' gramos por metro cúbico';
+
+        case 'SH':
+            return 'La humedad especifica es de ' + measure + ' gramos por kilo';
+
+        case 'RH':
+            return 'La humedad relativa es del ' + measure + ' %';
+
+        default:
+            return '';
+    }
+}
