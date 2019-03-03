@@ -22,21 +22,34 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     // Run the proper function handler based on the matched Dialogflow intent name
     let intentMap = new Map();
-    intentMap.set('Check House Temperature', checkHouseTemperature);
-    intentMap.set('Check House Humidity', checkHouseHumidity);
+    intentMap.set('Check Temperature', checkTemperature);
+    intentMap.set('Check Humidity', checkHumidity);
     agent.handleRequest(intentMap);
 
-    // Check the house temperature sensor on the database
-    function checkHouseTemperature(agent) {
-        return database.ref('sensorData/temperature').once('value', (snapshot) => {
-            agent.add('La temperatura es de ' + snapshot.val().measure + ' ' + snapshot.val().units);
+    // Check the last measure of the temperature sensor on the database
+    function checkTemperature(agent) {
+        return database.ref('sensorData/temperature').orderByKey().limitToLast(1).once('value', (snapshot) => {
+            const snapshotKey = Object.keys(snapshot.val())[0];
+            const snapshotValue = snapshot.val()[snapshotKey];
+            agent.add('La temperatura es de ' + snapshotValue["measure"] + ' ' + snapshotValue["units"]);
         });
     }
 
-    // Check the house humidity sensor on the database
-    function checkHouseHumidity(agent) {
-        return database.ref('sensorData/humidity').once('value', (snapshot) => {
-            agent.add(setHumidityExpresion(snapshot.val().measure, snapshot.val().units));
+    // // Trigger an alert if the temperature goes out of normal value
+    // function temperatureAlert(agent) {
+    //     database().ref('sensorData/temperature').on('value', (snapshot) => {
+    //         if (snapshot.val().measure > 22) {
+    //             console.log("Alerta");
+    //         }
+    //     });
+    // }
+
+    // Check the last measure of the humidity sensor on the database
+    function checkHumidity(agent) {
+        return database.ref('sensorData/humidity').orderByKey().limitToLast(1).once('value', (snapshot) => {
+            const snapshotKey = Object.keys(snapshot.val())[0];
+            const snapshotValue = snapshot.val()[snapshotKey];
+            agent.add(setHumidityExpresion(snapshotValue["measure"], snapshotValue["units"]));
         });
     }
 
