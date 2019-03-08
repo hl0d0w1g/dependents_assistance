@@ -24,33 +24,52 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     let intentMap = new Map();
     intentMap.set('Check Temperature', checkTemperature);
     intentMap.set('Check Humidity', checkHumidity);
+    intentMap.set('Get Home', getHome);
+    intentMap.set('Leaving Home', leavingHome);
     agent.handleRequest(intentMap);
 
     // Check the last measure of the temperature sensor on the database
     function checkTemperature(agent) {
-        return database.ref('sensorData/temperature').orderByKey().limitToLast(1).once('value', (snapshot) => {
-            const snapshotKey = Object.keys(snapshot.val())[0];
-            const snapshotValue = snapshot.val()[snapshotKey];
-            agent.add('La temperatura es de ' + snapshotValue["measure"] + ' ' + snapshotValue["units"]);
+        return database.ref('sensors/temperature').orderByKey().once('value', snapshot => {
+            const temperatureSensorAvailable = snapshot.child('state/available').val()
+            if (temperatureSensorAvailable) {
+                const temperatureSensorData = snapshot.child('data').val();
+                const keys = Object.keys(temperatureSensorData);
+                const value = temperatureSensorData[keys[keys.length - 1]];
+                console.log('Returned value', value);
+                agent.add('La temperatura es de ' + value["measure"] + ' ' + value["units"] + '.');
+            } else {
+                agent.add('El sensor de temperatura no está disponible.');
+            }
         });
     }
 
-    // // Trigger an alert if the temperature goes out of normal value
-    // function temperatureAlert(agent) {
-    //     database().ref('sensorData/temperature').on('value', (snapshot) => {
-    //         if (snapshot.val().measure > 22) {
-    //             console.log("Alerta");
-    //         }
-    //     });
-    // }
-
     // Check the last measure of the humidity sensor on the database
     function checkHumidity(agent) {
-        return database.ref('sensorData/humidity').orderByKey().limitToLast(1).once('value', (snapshot) => {
-            const snapshotKey = Object.keys(snapshot.val())[0];
-            const snapshotValue = snapshot.val()[snapshotKey];
-            agent.add(setHumidityExpresion(snapshotValue["measure"], snapshotValue["units"]));
+        return database.ref('sensors/humidity').orderByKey().once('value', snapshot => {
+            const humiditySensorAvailable = snapshot.child('state/available').val()
+            if (humiditySensorAvailable) {
+                const humiditySensorData = snapshot.child('data').val();
+                const keys = Object.keys(humiditySensorData);
+                const value = humiditySensorData[keys[keys.length - 1]];
+                console.log('Returned value', value);
+                agent.add(setHumidityExpresion(value["measure"], value["units"]));
+            } else {
+                agent.add('El sensor de humedad no está disponible.');
+            }
         });
+    }
+
+    // Register in the database when the user comes home
+    function getHome(agent) {
+        database.ref('user/state').set({ 'atHome': true });
+        agent.add(request.body.queryResult.fulfillmentText);
+    }
+
+    // Register in the database when the user leaves home
+    function leavingHome(agent) {
+        database.ref('user/state').set({ 'atHome': false });
+        agent.add(request.body.queryResult.fulfillmentText);
     }
 
     // // Uncomment and edit to make your own intent handler
@@ -88,13 +107,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 function setHumidityExpresion(measure, units) {
     switch (units) {
         case 'AH':
-            return 'La humedad absoluta es de ' + measure + ' gramos por metro cúbico';
+            return 'La humedad absoluta es de ' + measure + ' gramos por metro cúbico.';
 
         case 'SH':
-            return 'La humedad especifica es de ' + measure + ' gramos por kilo';
+            return 'La humedad especifica es de ' + measure + ' gramos por kilo.';
 
         case 'RH':
-            return 'La humedad relativa es del ' + measure + ' %';
+            return 'La humedad relativa es del ' + measure + ' %.';
 
         default:
             return '';

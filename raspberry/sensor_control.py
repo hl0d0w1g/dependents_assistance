@@ -27,20 +27,21 @@ db = firebase.database()
 # Use the datasheet GPIO number
 GPIO.setmode(GPIO.BCM)
 
-# Configure the DHT11 temperature and humidity sensor
-dht11Pin = 4
-dht11Sensor = Adafruit_DHT.DHT11
 
-# Configure the flame sensor
-ky026Pin = 17
-GPIO.setup(ky026Pin, GPIO.IN, GPIO.PUD_UP)
+def getSensorPin(name):
+    # Returns the RPi pin where the sensor is connected from the database
+    pin = db.child('sensors/' + name + '/state/RPiPin').get().val()
+    return pin
 
-# Configure the gas sensor
-mq135Pin = 27
-GPIO.setup(mq135Pin, GPIO.IN)
 
-# Update time of the sensors in seconds
-updateTime = 60
+def checkIfSensorIsAvailable(name, data):
+    # Check if the sensor is available
+    if data is None:
+        db.child('sensors/' + name + '/state/available').set(False)
+        return False
+    else:
+        db.child('sensors/' + name + '/state/available').set(True)
+        return True
 
 
 def getFlameSensorReading():
@@ -56,7 +57,24 @@ def getGasSensorReading():
     return GPIO.input(mq135Pin)
 
 
-print("Init dependents assistant sensor control")
+# Configure the DHT11 temperature and humidity sensor
+dht11Pin = getSensorPin('temperature')
+dht11Sensor = Adafruit_DHT.DHT11
+
+
+# Configure the flame sensor
+ky026Pin = getSensorPin('flame')
+GPIO.setup(ky026Pin, GPIO.IN, GPIO.PUD_UP)
+
+# Configure the gas sensor
+mq135Pin = 27
+GPIO.setup(mq135Pin, GPIO.IN)
+
+# Update time of the sensors in seconds
+updateTime = 60
+
+
+print("The sensor controller of the Dependents Assistant app is working")
 while True:
     # Get the current timestamp
     currentTimestamp = datetime.datetime.fromtimestamp(
@@ -71,20 +89,23 @@ while True:
     # Get gas detection from the sensor
     gas = getGasSensorReading()
 
-    # Set the temperature in the database
-    db.child('sensorData').child('temperature').push(
-        {'measure': temperature, 'units': '°C', 'time': currentTimestamp})
+    if (checkIfSensorIsAvailable('temperature', temperature)):
+        # Set the temperature in the database
+        db.child('sensors').child('temperature').child('data').push(
+            {'measure': temperature, 'units': '°C', 'time': currentTimestamp})
 
-    # Set the humidity in the database
-    db.child('sensorData').child('humidity').push(
-        {'measure': humidity, 'units': 'RH', 'time': currentTimestamp})
+    if (checkIfSensorIsAvailable('humidity', humidity)):
+        # Set the humidity in the database
+        db.child('sensors').child('humidity').child('data').push(
+            {'measure': humidity, 'units': 'RH', 'time': currentTimestamp})
 
-    # Set the flame detection in the database
-    db.child('sensorData').child('flame').push(
-        {'measure': flame, 'time': currentTimestamp})
+    if (checkIfSensorIsAvailable('flame', flame)):
+        # Set the flame detection in the database
+        db.child('sensors').child('flame').child('data').push(
+            {'measure': flame, 'time': currentTimestamp})
 
     # # Set the gas detection in the database
-    # db.child('sensorData').child('gas').push(
+    # db.child('sensors').child('gas').child('data').push(
     #     {'measure': gas, 'units': 'PPM', 'time': currentTimestamp})
 
     time.sleep(updateTime)
