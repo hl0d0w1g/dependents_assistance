@@ -1,0 +1,36 @@
+{
+  "name": "dependentsassistant",
+  "version": "0.0.1",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node server/app.js"
+  },
+  "keywords": [
+    "google",
+    "assistant",
+    "google",
+    "home",
+    "assistant",
+    "voice",
+    "control",
+    "broadcast",
+    "iot",
+    "node"
+  ],
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.6.1",
+    "body-parser": "^1.18.3",
+    "buffer-to-uint8array": "^1.1.0",
+    "cli-color": "^1.2.0",
+    "express": "^4.16.3",
+    "firebase-admin": "^7.1.1",
+    "google-assistant": "^0.2.0",
+    "ip": "^1.1.5",
+    "lowdb": "^1.0.0",
+    "prompt": "^1.0.0",
+    "terminal-image": "^0.1.1",
+    "wav": "^1.0.2",
+    "wav-file-info": "0.0.8"
+  }
+}

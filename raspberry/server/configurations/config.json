@@ -1,0 +1,19 @@
+{
+  "port": "3000",
+  "muteStartup": false,
+  "baseUrl": "http://192.168.1.34",
+  "conversation": {
+    "language": "es-ES",
+    "audio": {
+      "sampleRateOut": 24000,
+      "sampleRateIn": 24000
+    }
+  },
+  "users": {
+    "luis": {
+      "keyFilePath": "/home/luis/Projects/dependentsassistant/raspberry/server/configurations/secrets/luis.json",
+      "savedTokensPath": "/home/luis/Projects/dependentsassistant/raspberry/server/configurations/tokens/luis-tokens.json"
+    }
+  },
+  "assistants": {}
+}
