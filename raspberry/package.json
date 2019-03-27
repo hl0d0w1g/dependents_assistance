@@ -23,6 +23,7 @@
     "body-parser": "^1.18.3",
     "buffer-to-uint8array": "^1.1.0",
     "cli-color": "^1.2.0",
+    "dht-sensor": "0.0.5",
     "express": "^4.16.3",
     "firebase-admin": "^7.1.1",
     "google-assistant": "^0.2.0",

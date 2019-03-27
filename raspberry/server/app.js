@@ -5,6 +5,7 @@ const FileWriter = require('wav').FileWriter;
 
 const startConversation = require('./assistant.js');
 const firebase = require('./firebase.js');
+const sensors = require('./sensors.js');
 const routes = require('./routes.js');
 const audio = require('./audio.js');
 
