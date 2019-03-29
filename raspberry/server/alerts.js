@@ -2,7 +2,7 @@ const startConversation = require('./assistant.js');
 const sendTextInput = require('./assistant').sendTextInput;
 
 var admin = require('firebase-admin');
-var serviceAccount = require('./configurations/keys/serviceAccountKey.json');
+var serviceAccount = require('./configurations/credentials/serviceAccountCredentials.json');
 const projectURL = 'https://dependentsassistant.firebaseio.com';
 
 admin.initializeApp({
@@ -25,7 +25,7 @@ firebaseDB.ref('sensors/temperature/state').on('value', function (snapshot) {
 firebaseDB.ref('sensors/temperature/data').orderByKey().limitToLast(1).on('value', function (snapshot) {
     if (temperatureSensorAvailable) {
         let temperatureData = snapshot.val()[Object.keys(snapshot.val())[0]];
-        console.log('Temperature data: ', temperatureData, '\n');
+        // console.log('Temperature data: ', temperatureData, '\n');
         if (temperatureData.measure > 25) {
             console.log('ALERT: High temperature\n');
             sendTextInput(broadcast + 'La temperatura es demasiado alta.');

@@ -1,3 +1,4 @@
+#!./venv/bin/python
 # -*- coding: utf-8 -*-
 import time
 import datetime
@@ -10,17 +11,12 @@ firebaseConfig = {
     "apiKey": "AIzaSyB8jcGwrAajBJR9pyBNqZ3y7xweeyAdZA8",
     "authDomain": "dependentsassistant.firebaseapp.com",
     "databaseURL": "https://dependentsassistant.firebaseio.com",
-    "storageBucket": "dependentsassistant.appspot.com"
+    "storageBucket": "dependentsassistant.appspot.com",
+    "serviceAccount": "./credentials/serviceAccountCredentials.json"
 }
 
 # Initialize the firebase app
 firebase = pyrebase.initialize_app(firebaseConfig)
-
-# # Get a reference to the auth service
-# auth = firebase.auth()
-
-# # Log the user in
-# user = auth.sign_in_with_email_and_password(email, password)
 
 # Set a reference to the database
 db = firebase.database()

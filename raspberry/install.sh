@@ -3,7 +3,8 @@ echo 'Installing node server'
 npm install
 
 echo 'Installing sensors contoller'
-./sensors/install.sh
+cd sensors
+bash install.sh
 
 echo 'Starting system operation'
-./start.sh
+bash start.sh
