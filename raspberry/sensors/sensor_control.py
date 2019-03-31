@@ -1,5 +1,6 @@
 #!./venv/bin/python
 # -*- coding: utf-8 -*-
+
 import time
 import datetime
 import pyrebase
@@ -14,95 +15,128 @@ firebaseConfig = {
     "storageBucket": "dependentsassistant.appspot.com",
     "serviceAccount": "./credentials/serviceAccountCredentials.json"
 }
-
 # Initialize the firebase app
 firebase = pyrebase.initialize_app(firebaseConfig)
-
 # Set a reference to the database
 db = firebase.database()
 
 # Use the datasheet GPIO number
 GPIO.setmode(GPIO.BCM)
 
-
-def getSensorPin(name):
-    # Returns the RPi pin where the sensor is connected from the database
-    pin = db.child('sensors/' + name + '/state/RPiPin').get().val()
-    return pin
+# Storages the sensors info
+sensors = []
 
 
-def checkIfSensorIsAvailable(name, data):
+class Sensor:
+    # Represents a sensor connected to the RPi
+    category = ''
+    name = ''
+    units = ''
+    pin = 0
+    available = False
+    sensor = ''
+    lastMeasure = 0
+
+    def __init__(self, category, name, units, pin):
+        self.category = category
+        self.name = name
+        self.units = units
+        self.pin = pin
+        self.available = True
+
+    def setSensorAvailability(self, available):
+        self.available = available
+
+    def setSensor(self, sensor):
+        self.sensor = sensor
+
+    def setSensorMeasure(self, measure):
+        self.lastMeasure = measure
+
+    def getSensorCategory(self):
+        return self.category
+
+    def getSensorName(self):
+        return self.name
+
+    def getSensorUnits(self):
+        return self.units
+
+    def getSensorPin(self):
+        return self.pin
+
+    def getSensorAvailability(self):
+        return self.available
+
+    def getSensor(self):
+        return self.sensor
+
+    def getSensorMeasure(self):
+        return self.lastMeasure
+
+
+def setUpSensors():
+    # Set up and configure the sensors from the db
+    sensorsConfigurations = db.child('sensors/config').get().val()
+    for sensorCategory in sensorsConfigurations:
+        for sensor in sensorsConfigurations[sensorCategory]:
+            sensor = sensorsConfigurations[sensorCategory][sensor]
+            sensors.append(Sensor(sensorCategory,
+                                  sensor['name'],
+                                  sensor['units'],
+                                  sensor['RPiPin']))
+    for sensor in sensors:
+        if (sensor.getSensorCategory() in ('temperature', 'humidity')):
+            sensor.setSensor(Adafruit_DHT.DHT11)
+
+
+def updateSensorMeasure(sensor):
+    # Updates the sensor measure
+    if (sensor.getSensorCategory() in ('temperature')):
+        _, measure = Adafruit_DHT.read_retry(
+            sensor.getSensor(), sensor.getSensorPin())
+
+    elif (sensor.getSensorCategory() in ('humidity')):
+        measure, _ = Adafruit_DHT.read_retry(
+            sensor.getSensor(), sensor.getSensorPin())
+
+    sensor.setSensorMeasure(measure)
+
+
+def checkIfSensorIsAvailable(sensor):
     # Check if the sensor is available
-    if data is None:
-        db.child('sensors/' + name + '/state/available').set(False)
-        return False
-    else:
-        db.child('sensors/' + name + '/state/available').set(True)
-        return True
-
-
-def getFlameSensorReading():
-    # Return the reading of the flame sensor
-    if GPIO.input(ky026Pin):
-        return True
-    else:
+    if sensor.getSensorMeasure() is None:
+        sensor.setSensorAvailability(False)
+        db.child('sensors/config/' + sensor.getSensorCategory() + '/' +
+                 sensor.getSensorName() + '/available').set(False)
         return False
 
+    else:
+        sensor.setSensorAvailability(True)
+        db.child('sensors/config/' + sensor.getSensorCategory() + '/' +
+                 sensor.getSensorName() + '/available').set(True)
+        return True
 
-def getGasSensorReading():
-    # Return the reading of the gas sensor
-    return GPIO.input(mq135Pin)
-
-
-# Configure the DHT11 temperature and humidity sensor
-dht11Pin = getSensorPin('temperature')
-dht11Sensor = Adafruit_DHT.DHT11
-
-
-# Configure the flame sensor
-ky026Pin = getSensorPin('flame')
-GPIO.setup(ky026Pin, GPIO.IN, GPIO.PUD_UP)
-
-# Configure the gas sensor
-mq135Pin = 27
-GPIO.setup(mq135Pin, GPIO.IN)
 
 # Update time of the sensors in seconds
 updateTime = 60
 
-
+setUpSensors()
 print("The sensor controller of the Dependents Assistant app is working")
 while True:
     # Get the current timestamp
     currentTimestamp = datetime.datetime.fromtimestamp(
         time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
-    # Get the temperature and the humidity from the DHT11 sensor
-    humidity, temperature = Adafruit_DHT.read_retry(dht11Sensor, dht11Pin)
-
-    # Get flame detection from the sensor
-    flame = getFlameSensorReading()
-
-    # Get gas detection from the sensor
-    gas = getGasSensorReading()
-
-    if (checkIfSensorIsAvailable('temperature', temperature)):
-        # Set the temperature in the database
-        db.child('sensors').child('temperature').child('data').push(
-            {'measure': temperature, 'units': '°C', 'time': currentTimestamp})
-
-    if (checkIfSensorIsAvailable('humidity', humidity)):
-        # Set the humidity in the database
-        db.child('sensors').child('humidity').child('data').push(
-            {'measure': humidity, 'units': 'RH', 'time': currentTimestamp})
-
-    if (checkIfSensorIsAvailable('flame', flame)):
-        # Set the flame detection in the database
-        db.child('sensors').child('flame').child('data').push(
-            {'measure': flame, 'time': currentTimestamp})
-
-    # # Set the gas detection in the database
-    # db.child('sensors').child('gas').child('data').push(
-    #     {'measure': gas, 'units': 'PPM', 'time': currentTimestamp})
+    # Checks all sensors
+    for sensor in sensors:
+        updateSensorMeasure(sensor)
+        if (checkIfSensorIsAvailable(sensor)):
+            # Push the sensor measure in the database
+            db.child('sensors/data/' + sensor.getSensorCategory() + '/' + sensor.getSensorName() + '/history').push(
+                {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
+            # Set the last measured value
+            db.child('sensors/data/' + sensor.getSensorCategory() + '/' + sensor.getSensorName() + '/lastMeasurement').set(
+                {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
 
     time.sleep(updateTime)
