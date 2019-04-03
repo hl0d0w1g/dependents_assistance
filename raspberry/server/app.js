@@ -14,6 +14,7 @@ const setupAssistant = require('./assistant').setupAssistant;
 const sendTextInput = require('./assistant').sendTextInput;
 
 const app = express();
+app.use('/', express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 
 app.use('/', routes);

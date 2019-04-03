@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dependents Assistant</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+</head>
+
+<body onload="getSensorsInfo()">
+
+    <div class="container">
+
+        <div class="row justify-content-center p-5">
+            <div class="col-auto">
+                <h1>Dependents Assistant</h1>
+            </div>
+        </div>
+        <div class="row justify-content-center p-3">
+            <div class="col-10">
+                <div class="row justify-content-center border muted rounded-top p-2 my-3">
+                    <div class="col">
+                        <div class="row justify-content-between align-items-center border-bottom muted">
+                            <div class="col-auto">
+                                <h3 class="m-0">Temperature</h3>
+                            </div>
+                            <div class=col-auto>
+                                <button type="button" class="btn btn-link btn-lg" onclick="addTemperatureSensor()">Add
+                                    sensor</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h4 class="m-0">Salón</h4>
+                                    </div>
+                                    <div class="col text-muted">
+                                        <h5 class="m-0">20 ºC</h5>
+                                    </div>
+                                    <div class="col-auto pr-0">
+                                        <button type="button" class="btn btn-link btn-lg">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col-auto pl-0">
+                                        <button type="button" class="btn btn-link btn-lg">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center border muted rounded-bottom p-2 my-3">
+                    <div class="col">
+                        <div class="row justify-content-between align-items-center border-bottom muted">
+                            <div class="col-auto">
+                                <h3 class="m-0">Humidity</h3>
+                            </div>
+                            <div class=col-auto>
+                                <button type="button" class="btn btn-link btn-lg">Add sensor</button>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center align-items-center p-5">
+                            <div class="col-auto text-muted">
+                                <h4 class="m-0">It's seems there are not any humidity sensors yet.</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.8.4/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.8.4/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.8.4/firebase-database.js"></script>
+    <script src="./js/functions.js"></script>
+</body>
+
+</html>

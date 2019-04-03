@@ -30,14 +30,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     // Check the last measure of the temperature sensor on the database
     function checkTemperature(agent) {
-        return database.ref('sensors/temperature').orderByKey().once('value', snapshot => {
-            const temperatureSensorAvailable = snapshot.child('state/available').val()
+        return database.ref('sensors/data/lastMeasurement/temperature').once('value', snapshot => {
+            const temperatureSensorName = Object.keys(snapshot.val())[0];
+            console.log(temperatureSensorName);
+            const temperatureSensorData = snapshot.val()[temperatureSensorName];
+            const temperatureSensorAvailable = true;
             if (temperatureSensorAvailable) {
-                const temperatureSensorData = snapshot.child('data').val();
-                const keys = Object.keys(temperatureSensorData);
-                const value = temperatureSensorData[keys[keys.length - 1]];
-                console.log('Returned value', value);
-                agent.add('La temperatura es de ' + value["measure"] + ' ' + value["units"] + '.');
+                console.log('Temperature data: ', temperatureSensorData);
+                agent.add('La temperatura es de ' + temperatureSensorData.measure + ' ' + temperatureSensorData.units + '.');
             } else {
                 agent.add('El sensor de temperatura no está disponible.');
             }
