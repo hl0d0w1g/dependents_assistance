@@ -133,10 +133,10 @@ while True:
         updateSensorMeasure(sensor)
         if (checkIfSensorIsAvailable(sensor)):
             # Push the sensor measure in the database
-            db.child('sensors/data/' + sensor.getSensorCategory() + '/' + sensor.getSensorName() + '/history').push(
+            db.child('sensors/data/historyMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).push(
                 {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
             # Set the last measured value
-            db.child('sensors/data/' + sensor.getSensorCategory() + '/' + sensor.getSensorName() + '/lastMeasurement').set(
+            db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).set(
                 {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
 
     time.sleep(updateTime)

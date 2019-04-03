@@ -13,25 +13,38 @@ var firebaseDB = admin.database();
 
 const broadcast = 'broadcast ';
 
-let temperatureSensorAvailable;
+// Stores all the sensors configurations
+let sensorsConfig;
 
-// Checks if the temperature sensor is available
-firebaseDB.ref('sensors/temperature/state').on('value', function (snapshot) {
-    temperatureSensorAvailable = snapshot.val().available;
-    console.log('Temperature sensor available: ', temperatureSensorAvailable, '\n');
-})
+// Checks the sensors configuration
+firebaseDB.ref('sensors/config').on('value', function (snapshot) {
+    sensorsConfig = snapshot.val();
+});
 
-// Checks if the temperature is in the correct range of values
-firebaseDB.ref('sensors/temperature/data').orderByKey().limitToLast(1).on('value', function (snapshot) {
-    if (temperatureSensorAvailable) {
-        let temperatureData = snapshot.val()[Object.keys(snapshot.val())[0]];
-        // console.log('Temperature data: ', temperatureData, '\n');
-        if (temperatureData.measure > 25) {
-            console.log('ALERT: High temperature\n');
-            sendTextInput(broadcast + 'La temperatura es demasiado alta.');
-        } else if (temperatureData.measure < 10) {
-            console.log('ALERT: Low temperature\n');
-            sendTextInput(broadcast + 'La temperatura es demasiado baja.');
-        }
+// Checks if the temperature is in the correct range of values on each sensor
+firebaseDB.ref('sensors/data/lastMeasurement/temperature').on('child_changed', function (snapshot) {
+    const temperatureSensorName = snapshot.key;
+    const temperatureSensorData = snapshot.val();
+    // console.log('Temperature data: ', temperatureSensorData, '\n');
+    if (temperatureSensorData.measure > sensorsConfig['temperature'][temperatureSensorName].upperLimit) {
+        console.log('ALERT: High temperature on ' + temperatureSensorName + '\n');
+        sendTextInput(broadcast + 'La temperatura en ' + temperatureSensorName + ' es demasiado alta.');
+    } else if (temperatureSensorData.measure < sensorsConfig['temperature'][temperatureSensorName].lowerLimit) {
+        console.log('ALERT: Low temperature\n');
+        sendTextInput(broadcast + 'La temperatura en ' + temperatureSensorName + ' es demasiado baja.');
+    }
+});
+
+// Checks if the humidity is in the correct range of values on each sensor
+firebaseDB.ref('sensors/data/lastMeasurement/humidity').on('child_changed', function (snapshot) {
+    const humiditySensorName = snapshot.key;
+    const humiditySensorData = snapshot.val();
+    // console.log('Humidity data: ', humiditySensorData, '\n');
+    if (humiditySensorData.measure > sensorsConfig['humidity'][humiditySensorName].upperLimit) {
+        console.log('ALERT: High humidity on ' + humiditySensorName + '\n');
+        sendTextInput(broadcast + 'La humedad en ' + humiditySensorName + ' es demasiado alta.');
+    } else if (humiditySensorData.measure < sensorsConfig['humidity'][humiditySensorName].lowerLimit) {
+        console.log('ALERT: Low humidity\n');
+        sendTextInput(broadcast + 'La humedad en ' + humiditySensorName + ' es demasiado baja.');
     }
 });
