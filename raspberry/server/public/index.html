@@ -21,10 +21,62 @@
         </div>
         <div class="row justify-content-center p-3">
             <div class="col-10">
-                <div class="row justify-content-end">
+                <div id="addSensorButton" class="row justify-content-end">
                     <div class=col-auto>
-                        <button type="button" class="btn btn-link btn-lg" onclick="addSensor()">Add
+                        <button type="button" class="btn btn-link btn-lg" onclick="viewAddSensorForm()">Add
                             sensor</button>
+                    </div>
+                </div>
+                <div id="addNewSensorForm" class="row justify-content-center" style="display: none;">
+                    <div class=col-auto>
+                        <form>
+                            <div class="form-row">
+                                <div class="form-group col-6">
+                                    <label for="inputSensorName">Sensor name</label>
+                                    <input type="text" class="form-control" id="inputSensorName" placeholder="Name">
+                                </div>
+                                <div class="form-group col-6">
+                                    <label for="inputSensorType">Sensor type</label>
+                                    <select id="inputSensorType" class="form-control">
+                                        <option selected>Choose...</option>
+                                        <option>Temperature & Humidity - DHT11</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-4">
+                                    <label for="inputSensorUnits">Units</label>
+                                    <select id="inputSensorUnits" class="form-control">
+                                        <option selected>Choose...</option>
+                                        <option>ºC</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-4">
+                                    <label for="inputSensorLowerLimit">Lower limit</label>
+                                    <input type="number" class="form-control" id="inputSensorLowerLimit"
+                                        placeholder="Lower limit">
+                                </div>
+                                <div class="form-group col-4">
+                                    <label for="inputSensorUpperLimit">Upper limit</label>
+                                    <input type="number" class="form-control" id="inputSensorUpperLimit"
+                                        placeholder="Upper limit">
+                                </div>
+                            </div>
+                            <div class="form-row justify-content-between align-items-end">
+                                <div class="form-group col-auto">
+                                    <label for="inputSensorRPiPin">RPi pin</label>
+                                    <select id="inputSensorRPiPin" class="form-control">
+                                        <option selected>Choose...</option>
+                                        <option>4</option>
+                                        <option>4</option>
+                                        <option>6</option>
+                                    </select>
+                                </div>
+                                <div class="col-auto">
+                                    <button class="btn btn-primary" onclick="addNewSensor()">Add sensor</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <div class="row justify-content-center border muted rounded-top p-2 my-3">
@@ -35,7 +87,7 @@
                             </div>
                         </div>
 
-                        <div id="noTemperatureSensorsMessage" class="row justify-content-center align-items-center p-5">
+                        <div id="temperatureNoSensorsMessage" class="row justify-content-center align-items-center p-5">
                             <div class="col-auto text-muted">
                                 <h4 class="m-0">It's seems there are not any temperature sensors yet.</h4>
                             </div>
@@ -56,9 +108,15 @@
                             </div>
                         </div>
 
-                        <div id="noHumiditySensorsMessage" class="row justify-content-center align-items-center p-5">
+                        <div id="humidityNoSensorsMessage" class="row justify-content-center align-items-center p-5">
                             <div class="col-auto text-muted">
                                 <h4 class="m-0">It's seems there are not any humidity sensors yet.</h4>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div id="humiditySensorsList" class="col">
+
                             </div>
                         </div>
 
