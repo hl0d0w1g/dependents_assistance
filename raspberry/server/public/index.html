@@ -28,7 +28,7 @@
                     </div>
                 </div>
                 <div id="addNewSensorForm" class="row justify-content-center" style="display: none;">
-                    <div class=col-auto>
+                    <div class="col px-0 py-2">
                         <form>
                             <div class="form-row">
                                 <div class="form-group col-6">
@@ -38,42 +38,62 @@
                                 <div class="form-group col-6">
                                     <label for="inputSensorType">Sensor type</label>
                                     <select id="inputSensorType" class="form-control">
-                                        <option selected>Choose...</option>
-                                        <option>Temperature & Humidity - DHT11</option>
+                                        <option selected disabled>Choose...</option>
+                                        <option value="temperature">Temperature (ºC)</option>
+                                        <option value="humidity">Humidity (%)</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group col-4">
-                                    <label for="inputSensorUnits">Units</label>
-                                    <select id="inputSensorUnits" class="form-control">
-                                        <option selected>Choose...</option>
-                                        <option>ºC</option>
-                                    </select>
-                                </div>
-                                <div class="form-group col-4">
-                                    <label for="inputSensorLowerLimit">Lower limit</label>
+                                    <label for="inputSensorLowerLimit">Lower secure limit</label>
                                     <input type="number" class="form-control" id="inputSensorLowerLimit"
                                         placeholder="Lower limit">
                                 </div>
                                 <div class="form-group col-4">
-                                    <label for="inputSensorUpperLimit">Upper limit</label>
+                                    <label for="inputSensorUpperLimit">Upper secure limit</label>
                                     <input type="number" class="form-control" id="inputSensorUpperLimit"
                                         placeholder="Upper limit">
                                 </div>
-                            </div>
-                            <div class="form-row justify-content-between align-items-end">
-                                <div class="form-group col-auto">
+                                <div class="form-group col-4">
                                     <label for="inputSensorRPiPin">RPi pin</label>
                                     <select id="inputSensorRPiPin" class="form-control">
-                                        <option selected>Choose...</option>
-                                        <option>4</option>
-                                        <option>4</option>
-                                        <option>6</option>
+                                        <option selected disabled>Choose...</option>
+                                        <option id="rpiPinOption2" value="2">2</option>
+                                        <option id="rpiPinOption3" value="3">3</option>
+                                        <option id="rpiPinOption4" value="4">4</option>
+                                        <option id="rpiPinOption5" value="5">5</option>
+                                        <option id="rpiPinOption6" value="6">6</option>
+                                        <option id="rpiPinOption7" value="7">7</option>
+                                        <option id="rpiPinOption8" value="8">8</option>
+                                        <option id="rpiPinOption9" value="9">9</option>
+                                        <option id="rpiPinOption10" value="10">10</option>
+                                        <option id="rpiPinOption11" value="11">11</option>
+                                        <option id="rpiPinOption12" value="12">12</option>
+                                        <option id="rpiPinOption13" value="13">13</option>
+                                        <option id="rpiPinOption14" value="14">14</option>
+                                        <option id="rpiPinOption15" value="15">15</option>
+                                        <option id="rpiPinOption16" value="16">16</option>
+                                        <option id="rpiPinOption17" value="17">17</option>
+                                        <option id="rpiPinOption18" value="18">18</option>
+                                        <option id="rpiPinOption19" value="19">19</option>
+                                        <option id="rpiPinOption20" value="20">20</option>
+                                        <option id="rpiPinOption21" value="21">21</option>
+                                        <option id="rpiPinOption22" value="22">22</option>
+                                        <option id="rpiPinOption23" value="23">23</option>
+                                        <option id="rpiPinOption24" value="24">24</option>
+                                        <option id="rpiPinOption25" value="25">25</option>
+                                        <option id="rpiPinOption26" value="26">26</option>
+                                        <option id="rpiPinOption27" value="27">27</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div class="form-row justify-content-end">
                                 <div class="col-auto">
-                                    <button class="btn btn-primary" onclick="addNewSensor()">Add sensor</button>
+                                    <button type="button" class="btn btn-danger"
+                                        onclick="cancelAddNewSensor()">Cancel</button>
+                                    <button type="button" class="btn btn-primary" onclick="addNewSensor()">Add
+                                        sensor</button>
                                 </div>
                             </div>
                         </form>

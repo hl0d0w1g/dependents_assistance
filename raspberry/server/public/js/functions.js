@@ -19,16 +19,18 @@ class Sensor {
         this.units = units;
         this.upperLimit = upperLimit;
         this.lowerLimit = lowerLimit;
-        this.measure = 0;
-    }
-
-    // Adding a method to the constructor
-    greet() {
-        return `${this.name} says hello.`;
     }
 }
 
 var sensors = { temperature: [], humidity: [] };
+
+// Get the data on a measure that has changed
+database.ref('sensors/data/lastMeasurement').on('child_changed', function (snapshot) {
+    const sensorCategory = snapshot.key;
+    const sensorName = Object.keys(snapshot.val())[0];
+    const sensorData = snapshot.val()[sensorName];
+    document.getElementById(sensorCategory + sensorName + 'Measure').innerText = sensorData.measure + sensorData.units;
+});
 
 // Inits the sensors storage variable and display 
 function init() {
@@ -88,6 +90,18 @@ function hideNoSensorMessage(sensorCategory) {
     document.getElementById(sensorCategory + 'NoSensorsMessage').style.display = 'none';
 }
 
+// // Disables the RPI busy pins in the dropdown menu
+// function disableBusyRPiPins() {
+//     for (i = 2; i < 28; i++) {
+//         document.getElementById('rpiPinOption' + i).disabled = false;
+//     }
+//     for (const sensorCategory in sensors) {
+//         for (i = 0; i < sensors[sensorCategory].length; i++) {
+//             document.getElementById('rpiPinOption' + sensors[sensorCategory][i].rpiPin).disabled = true;
+//         }
+//     }
+// }
+
 // Renders all the sensors to the display
 function renderSensors() {
     for (const sensorCategory in sensors) {
@@ -95,6 +109,20 @@ function renderSensors() {
             rendersSensorDisplay(sensors[sensorCategory][i]);
         }
     }
+    getLastSensorsMeasurements();
+}
+
+// Gets the last sensors measurements
+function getLastSensorsMeasurements() {
+    database.ref('sensors/data/lastMeasurement').once('value', function (snapshot) {
+        const sensorsData = snapshot.val();
+        for (const sensorCategory in sensorsData) {
+            for (const sensorName in sensorsData[sensorCategory]) {
+                const sensorData = sensorsData[sensorCategory][sensorName];
+                document.getElementById(sensorCategory + sensorName + 'Measure').innerText = sensorData.measure + sensorData.units;
+            }
+        }
+    });
 }
 
 // Generates the element to display the sensor info
@@ -117,8 +145,9 @@ function rendersSensorDisplay(sensor) {
     row.appendChild(sensorMeasureCol);
 
     const sensorMeasureTag = document.createElement('H5');
+    sensorMeasureTag.setAttribute('id', sensor.category + sensor.name + 'Measure');
     sensorMeasureTag.classList.add('m-0');
-    sensorMeasureTag.innerText = sensor.measure + setUnits(sensor);
+    sensorMeasureTag.innerText = 'not found';
     sensorMeasureCol.appendChild(sensorMeasureTag);
 
     const editButtonCol = document.createElement('DIV');
@@ -186,10 +215,32 @@ function viewAddSensorForm() {
     document.getElementById('addNewSensorForm').style.display = 'flex';
 }
 
-// Set a new sensor on the db
-function addNewSensor() {
+// Cancel the new sensor addition
+function cancelAddNewSensor() {
     document.getElementById('addNewSensorForm').style.display = 'none';
     document.getElementById('addSensorButton').style.display = 'flex';
+}
+
+// Set a new sensor on the db
+function addNewSensor() {
+    const sensorName = document.getElementById('inputSensorName').value;
+    const sensorCategory = document.getElementById('inputSensorType').value;
+    const sensorLowerLimit = document.getElementById('inputSensorLowerLimit').value;
+    const sensorUpperLimit = document.getElementById('inputSensorUpperLimit').value;
+    const sensorRPiPin = document.getElementById('inputSensorRPiPin').value;
+    const sensorUnits = setNewSensorUnits(sensorCategory);
+    console.log(sensorCategory, sensorName);
+    database.ref('sensors/config/' + sensorCategory + '/' + sensorName).set({
+        name: sensorName,
+        RPiPin: sensorRPiPin,
+        available: false,
+        units: sensorUnits,
+        lowerLimit: sensorLowerLimit,
+        upperLimit: sensorUpperLimit
+    }, function () {
+        document.getElementById('addNewSensorForm').style.display = 'none';
+        document.getElementById('addSensorButton').style.display = 'flex';
+    });
 }
 
 // Edits the properties of the specified sensor
@@ -211,4 +262,18 @@ function deleteSensor(sensor) {
             showNoSensorMessage(sensor.category);
         }
     });
+}
+
+// Sets the default units for the new sensors
+function setNewSensorUnits(sensorCategory) {
+    switch (sensorCategory) {
+        case 'temperature':
+            return 'ºC';
+
+        case 'humidity':
+            return 'RH';
+
+        default:
+            break;
+    }
 }
