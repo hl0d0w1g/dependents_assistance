@@ -21,7 +21,20 @@
         </div>
         <div class="row justify-content-center p-3">
             <div class="col-10">
-                <div id="addSensorButton" class="row justify-content-end">
+                <div id="addSensorButton" class="row justify-content-between align-items-center">
+                    <div class="col-auto px-0">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">Notifications email</span>
+                            </div>
+                            <input id="inputNotificationsEmail" type="email" class="form-control"
+                                placeholder="example@example.com" aria-label="email" aria-describedby="basic-addon1">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-primary" type="button"
+                                    onclick="saveNotificationsEmail()">Save</button>
+                            </div>
+                        </div>
+                    </div>
                     <div class=col-auto>
                         <button type="button" class="btn btn-link btn-lg" onclick="viewAddSensorForm()">Add
                             sensor</button>

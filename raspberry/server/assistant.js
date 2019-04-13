@@ -44,7 +44,7 @@ var self = module.exports = {
         if (err) return reject(err.message);
         (async () => {
           console.log(`Dependents Assistant is now setup and running for${users.map(u => ` ${u}`)} \n`)
-          console.log(`You can now visit ${global.config.baseUrl} in a browser, or send POST requests to it`);
+          console.log(`You can now visit ${global.config.rpiUrl}:${global.config.port} in a browser`);
         })();
         if (!global.config.muteStartup) {
           self.sendTextInput(broadcast + 'El asistente está funcionando');

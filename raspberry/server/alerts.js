@@ -1,20 +1,31 @@
+var admin = require('firebase-admin');
+var nodemailer = require('nodemailer');
+
 const startConversation = require('./assistant.js');
 const sendTextInput = require('./assistant').sendTextInput;
 
-var admin = require('firebase-admin');
-var serviceAccount = require('./configurations/credentials/serviceAccountCredentials.json');
 const projectURL = 'https://dependentsassistant.firebaseio.com';
+var firebaseAccount = require('./configurations/credentials/firebaseAccountCredentials.json');
+
+var emailAccount = require('./configurations/credentials/emailAccountCredentials.json');
 
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(firebaseAccount),
     databaseURL: projectURL,
 });
 var firebaseDB = admin.database();
-
 const broadcast = 'broadcast ';
 
 // Stores all the sensors configurations
 let sensorsConfig;
+
+var mailer = nodemailer.createTransport(emailAccount);
+let destinationEmail = '';
+
+// Checks the sensors configuration
+firebaseDB.ref('user/notificationsEmail').on('value', function (snapshot) {
+    destinationEmail = snapshot.val();
+});
 
 // Checks the sensors configuration
 firebaseDB.ref('sensors/config').on('value', function (snapshot) {
@@ -29,9 +40,11 @@ firebaseDB.ref('sensors/data/lastMeasurement/temperature').on('child_changed', f
     if (temperatureSensorData.measure > sensorsConfig['temperature'][temperatureSensorName].upperLimit) {
         console.log('ALERT: High temperature on ' + temperatureSensorName + '\n');
         sendTextInput(broadcast + 'La temperatura en ' + temperatureSensorName + ' es demasiado alta.');
+        sendEmail('ALERTA de Temperatura', 'La temperatura en ' + temperatureSensorName + ' es demasiado alta.');
     } else if (temperatureSensorData.measure < sensorsConfig['temperature'][temperatureSensorName].lowerLimit) {
         console.log('ALERT: Low temperature\n');
         sendTextInput(broadcast + 'La temperatura en ' + temperatureSensorName + ' es demasiado baja.');
+        sendEmail('ALERTA de Temperatura', 'La temperatura en ' + temperatureSensorName + ' es demasiado baja.');
     }
 });
 
@@ -43,8 +56,27 @@ firebaseDB.ref('sensors/data/lastMeasurement/humidity').on('child_changed', func
     if (humiditySensorData.measure > sensorsConfig['humidity'][humiditySensorName].upperLimit) {
         console.log('ALERT: High humidity on ' + humiditySensorName + '\n');
         sendTextInput(broadcast + 'La humedad en ' + humiditySensorName + ' es demasiado alta.');
+        sendEmail('ALERTA de Humedad', 'La humedad en ' + humiditySensorName + ' es demasiado alta.');
     } else if (humiditySensorData.measure < sensorsConfig['humidity'][humiditySensorName].lowerLimit) {
         console.log('ALERT: Low humidity\n');
         sendTextInput(broadcast + 'La humedad en ' + humiditySensorName + ' es demasiado baja.');
+        sendEmail('ALERTA de Humedad', 'La humedad en ' + humiditySensorName + ' es demasiado baja.');
     }
 });
+
+
+function sendEmail(msgSubject, msgText) {
+    const mailOptions = {
+        from: emailAccount.auth.user,
+        to: destinationEmail,
+        subject: msgSubject,
+        text: msgText
+    };
+    mailer.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+    });
+}

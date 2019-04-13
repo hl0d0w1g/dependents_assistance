@@ -24,6 +24,13 @@ class Sensor {
 
 var sensors = { temperature: [], humidity: [] };
 
+// Gets the notifications email
+database.ref('user/notificationsEmail').on('value', function (snapshot) {
+    const notificationsEmail = snapshot.val();
+    document.getElementById('inputNotificationsEmail').value = notificationsEmail;
+
+});
+
 // Get the data on a measure that has changed
 database.ref('sensors/data/lastMeasurement').on('child_changed', function (snapshot) {
     const sensorCategory = snapshot.key;
@@ -219,6 +226,12 @@ function viewAddSensorForm() {
 function cancelAddNewSensor() {
     document.getElementById('addNewSensorForm').style.display = 'none';
     document.getElementById('addSensorButton').style.display = 'flex';
+}
+
+// Saves the notifications email set by the user
+function saveNotificationsEmail() {
+    const newNotificationsEmail = document.getElementById('inputNotificationsEmail').value;
+    database.ref('user/notificationsEmail').set(newNotificationsEmail);
 }
 
 // Set a new sensor on the db
