@@ -25,18 +25,18 @@
                     <div class="col-auto px-0">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1">Notifications email</span>
+                                <span class="input-group-text" id="basic-addon1">Email de notificaciones</span>
                             </div>
                             <input id="inputNotificationsEmail" type="email" class="form-control"
                                 placeholder="example@example.com" aria-label="email" aria-describedby="basic-addon1">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-primary" type="button"
-                                    onclick="saveNotificationsEmail()">Save</button>
+                                    onclick="saveNotificationsEmail()">Guardar</button>
                             </div>
                         </div>
                     </div>
                     <div class=col-auto>
-                        <button type="button" class="btn btn-link btn-lg" onclick="viewAddSensorForm()">Add
+                        <button type="button" class="btn btn-link btn-lg" onclick="viewAddSensorForm()">Añadir
                             sensor</button>
                     </div>
                 </div>
@@ -45,33 +45,37 @@
                         <form>
                             <div class="form-row">
                                 <div class="form-group col-6">
-                                    <label for="inputSensorName">Sensor name</label>
-                                    <input type="text" class="form-control" id="inputSensorName" placeholder="Name">
+                                    <label for="inputSensorType">Tipo de sensor</label>
+                                    <select id="inputSensorType" class="form-control">
+                                        <option selected disabled>Elegir...</option>
+                                        <option value="temperature">Temperatura (ºC)</option>
+                                        <option value="humidity">Humedad (%)</option>
+                                    </select>
                                 </div>
                                 <div class="form-group col-6">
-                                    <label for="inputSensorType">Sensor type</label>
-                                    <select id="inputSensorType" class="form-control">
-                                        <option selected disabled>Choose...</option>
-                                        <option value="temperature">Temperature (ºC)</option>
-                                        <option value="humidity">Humidity (%)</option>
+                                    <label for="inputSensorLocation">Ubicación</label>
+                                    <select id="inputSensorLocation" class="form-control">
+                                        <option selected disabled>Elegir...</option>
+                                        <option value="salon">Salón</option>
+                                        <option value="habitacion">Habitación</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group col-4">
-                                    <label for="inputSensorLowerLimit">Lower secure limit</label>
+                                    <label for="inputSensorLowerLimit">Límite inferior de seguridad</label>
                                     <input type="number" class="form-control" id="inputSensorLowerLimit"
-                                        placeholder="Lower limit">
+                                        placeholder="Límite inferior">
                                 </div>
                                 <div class="form-group col-4">
-                                    <label for="inputSensorUpperLimit">Upper secure limit</label>
+                                    <label for="inputSensorUpperLimit">Límite superior de seguridad</label>
                                     <input type="number" class="form-control" id="inputSensorUpperLimit"
-                                        placeholder="Upper limit">
+                                        placeholder="Límite superior">
                                 </div>
                                 <div class="form-group col-4">
                                     <label for="inputSensorRPiPin">RPi pin</label>
                                     <select id="inputSensorRPiPin" class="form-control">
-                                        <option selected disabled>Choose...</option>
+                                        <option selected disabled>Elegir...</option>
                                         <option id="rpiPinOption2" value="2">2</option>
                                         <option id="rpiPinOption3" value="3">3</option>
                                         <option id="rpiPinOption4" value="4">4</option>
@@ -104,8 +108,8 @@
                             <div class="form-row justify-content-end">
                                 <div class="col-auto">
                                     <button type="button" class="btn btn-danger"
-                                        onclick="cancelAddNewSensor()">Cancel</button>
-                                    <button type="button" class="btn btn-primary" onclick="addNewSensor()">Add
+                                        onclick="cancelAddNewSensor()">Cancelar</button>
+                                    <button type="button" class="btn btn-primary" onclick="addNewSensor()">Añadir
                                         sensor</button>
                                 </div>
                             </div>
@@ -116,13 +120,13 @@
                     <div class="col">
                         <div class="row justify-content-between align-items-center border-bottom muted">
                             <div class="col-auto">
-                                <h3>Temperature</h3>
+                                <h3>Temperatura</h3>
                             </div>
                         </div>
 
                         <div id="temperatureNoSensorsMessage" class="row justify-content-center align-items-center p-5">
                             <div class="col-auto text-muted">
-                                <h4 class="m-0">It's seems there are not any temperature sensors yet.</h4>
+                                <h4 class="m-0">Parece que todavía no hay sensores de temperatura.</h4>
                             </div>
                         </div>
 
@@ -137,13 +141,13 @@
                     <div class="col">
                         <div class="row justify-content-between align-items-center border-bottom muted">
                             <div class="col-auto">
-                                <h3>Humidity</h3>
+                                <h3>Humedad</h3>
                             </div>
                         </div>
 
                         <div id="humidityNoSensorsMessage" class="row justify-content-center align-items-center p-5">
                             <div class="col-auto text-muted">
-                                <h4 class="m-0">It's seems there are not any humidity sensors yet.</h4>
+                                <h4 class="m-0">Parece que todavía no hay sensores de humedad.</h4>
                             </div>
                         </div>
 
