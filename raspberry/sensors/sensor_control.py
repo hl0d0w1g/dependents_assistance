@@ -118,6 +118,17 @@ def checkIfSensorIsAvailable(sensor):
         return True
 
 
+def calcSensorsAverage(sensor):
+    # Calc the average of the sensors with the same units
+    measuresSum = 0
+    sensorsNumber = 0
+    for s in sensors:
+        if s.category == sensor.category:
+            measuresSum += s.measure
+            sensorsNumber += 1
+    return measuresSum / sensorsNumber
+
+
 # Update time of the sensors in seconds
 updateTime = 60
 
@@ -138,5 +149,8 @@ while True:
             # Set the last measured value
             db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).set(
                 {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
+            # Set the average measured value
+            db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/average').set(
+                {'measure': calcSensorsAverage(sensor), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
 
     time.sleep(updateTime)

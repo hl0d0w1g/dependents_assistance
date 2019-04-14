@@ -31,31 +31,35 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     // Check the last measure of the temperature sensor on the database
     function checkTemperature(agent) {
         return database.ref('sensors/data/lastMeasurement/temperature').once('value', snapshot => {
-            const temperatureSensorName = Object.keys(snapshot.val())[0];
-            console.log(temperatureSensorName);
-            const temperatureSensorData = snapshot.val()[temperatureSensorName];
-            const temperatureSensorAvailable = true;
-            if (temperatureSensorAvailable) {
-                console.log('Temperature data: ', temperatureSensorData);
-                agent.add('La temperatura es de ' + temperatureSensorData.measure + ' ' + temperatureSensorData.units + '.');
+            const temperatureData = snapshot.val();
+            const parameters = request.body.queryResult.parameters;
+            const temperatureSensorData = temperatureData[parameters.location];
+            if (parameters) {
+                try {
+                    agent.add('La temperatura es de ' + temperatureSensorData.measure + ' ' + temperatureSensorData.units + '.');
+                } catch (error) {
+                    agent.add('Ese sensor no está disponible.');
+                }
             } else {
-                agent.add('El sensor de temperatura no está disponible.');
+                agent.add('La temperatura media es de ' + temperatureData['average'].measure + ' ' + temperatureData['average'].units + '.');
             }
         });
     }
 
     // Check the last measure of the humidity sensor on the database
     function checkHumidity(agent) {
-        return database.ref('sensors/humidity').orderByKey().once('value', snapshot => {
-            const humiditySensorAvailable = snapshot.child('state/available').val()
-            if (humiditySensorAvailable) {
-                const humiditySensorData = snapshot.child('data').val();
-                const keys = Object.keys(humiditySensorData);
-                const value = humiditySensorData[keys[keys.length - 1]];
-                console.log('Returned value', value);
-                agent.add(setHumidityExpresion(value["measure"], value["units"]));
+        return database.ref('sensors/data/lastMeasurement/humidity').once('value', snapshot => {
+            const humidityData = snapshot.val();
+            const parameters = request.body.queryResult.parameters;
+            const humiditySensorData = humidityData[parameters.location];
+            if (parameters) {
+                try {
+                    agent.add('La humedad es de ' + humiditySensorData.measure + ' ' + humiditySensorData.units + '.');
+                } catch (error) {
+                    agent.add('Ese sensor no está disponible.');
+                }
             } else {
-                agent.add('El sensor de humedad no está disponible.');
+                agent.add('La humedad media es de ' + humidityData['average'].measure + ' ' + humidityData['average'].units + '.');
             }
         });
     }
