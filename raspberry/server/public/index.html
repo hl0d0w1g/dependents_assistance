@@ -50,6 +50,8 @@
                                         <option selected disabled>Elegir...</option>
                                         <option value="temperature">Temperatura (ºC)</option>
                                         <option value="humidity">Humedad (%)</option>
+                                        <option value="presence">Presencia</option>
+                                        <option value="fire">Fuego</option>
                                     </select>
                                 </div>
                                 <div class="form-group col-6">
@@ -116,6 +118,7 @@
                         </form>
                     </div>
                 </div>
+
                 <div class="row justify-content-center border muted rounded-top p-2 my-3">
                     <div class="col">
                         <div class="row justify-content-between align-items-center border-bottom muted">
@@ -137,6 +140,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="row justify-content-center border muted rounded-bottom p-2 my-3">
                     <div class="col">
                         <div class="row justify-content-between align-items-center border-bottom muted">
@@ -157,6 +161,50 @@
                             </div>
                         </div>
 
+                    </div>
+                </div>
+
+                <div class="row justify-content-center border muted rounded-top p-2 my-3">
+                    <div class="col">
+                        <div class="row justify-content-between align-items-center border-bottom muted">
+                            <div class="col-auto">
+                                <h3>Presencia</h3>
+                            </div>
+                        </div>
+
+                        <div id="presenceNoSensorsMessage" class="row justify-content-center align-items-center p-5">
+                            <div class="col-auto text-muted">
+                                <h4 class="m-0">Parece que todavía no hay sensores de presencia.</h4>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div id="presenceSensorsList" class="col">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center border muted rounded-top p-2 my-3">
+                    <div class="col">
+                        <div class="row justify-content-between align-items-center border-bottom muted">
+                            <div class="col-auto">
+                                <h3>Fuego</h3>
+                            </div>
+                        </div>
+
+                        <div id="fireNoSensorsMessage" class="row justify-content-center align-items-center p-5">
+                            <div class="col-auto text-muted">
+                                <h4 class="m-0">Parece que todavía no hay sensores de detección de fuego.</h4>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div id="fireSensorsList" class="col">
+
+                            </div>
+                        </div>
                     </div>
                 </div>
 

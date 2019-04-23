@@ -89,6 +89,9 @@ def setUpSensors():
         if (sensor.getSensorCategory() in ('temperature', 'humidity')):
             sensor.setSensor(Adafruit_DHT.DHT11)
 
+        elif (sensor.getSensorCategory() in ('presence', 'fire')):
+            measure = GPIO.setup(sensor.getSensorPin(), GPIO.IN)
+
 
 def updateSensorMeasure(sensor):
     # Updates the sensor measure
@@ -99,6 +102,9 @@ def updateSensorMeasure(sensor):
     elif (sensor.getSensorCategory() in ('humidity')):
         measure, _ = Adafruit_DHT.read_retry(
             sensor.getSensor(), sensor.getSensorPin())
+
+    elif (sensor.getSensorCategory() in ('presence', 'fire')):
+        measure = GPIO.input(sensor.getSensorPin())
 
     sensor.setSensorMeasure(measure)
 
@@ -150,7 +156,8 @@ while True:
             db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).set(
                 {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
             # Set the average measured value
-            db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/average').set(
-                {'measure': calcSensorsAverage(sensor), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
+            if (sensor.getSensorCategory() in ('temperature', 'humidity')):
+                db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/average').set(
+                    {'measure': calcSensorsAverage(sensor), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
 
     time.sleep(updateTime)

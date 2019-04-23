@@ -64,7 +64,19 @@ firebaseDB.ref('sensors/data/lastMeasurement/humidity').on('child_changed', func
     }
 });
 
+// Checks if the fire sensor is not active
+firebaseDB.ref('sensors/data/lastMeasurement/fire').on('child_changed', function (snapshot) {
+    const fireSensorName = snapshot.key;
+    const fireSensorData = snapshot.val();
+    // console.log('Fire data: ', fireSensorData, '\n');
+    if (fireSensorData.measure) {
+        console.log('ALERT: High humidity on ' + humiditySensorName + '\n');
+        sendTextInput(broadcast + 'Se ha detectado fuego en ' + humiditySensorName + ', por favor compruebelo.');
+        sendEmail('ALERTA de Fuego', 'Se ha detectado fuego en ' + humiditySensorName + ', por favor compruebelo.');
+    }
+});
 
+// Sends an email when a alert is triggered
 function sendEmail(msgSubject, msgText) {
     const mailOptions = {
         from: emailAccount.auth.user,

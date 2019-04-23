@@ -22,7 +22,7 @@ class Sensor {
     }
 }
 
-var sensors = { temperature: [], humidity: [] };
+var sensors = { temperature: [], humidity: [], presence: [], fire: [] };
 
 // Gets the notifications email
 database.ref('user/notificationsEmail').on('value', function (snapshot) {
@@ -47,7 +47,7 @@ function init() {
             document.getElementById(sensor.category + sensor.name).remove();
         }
     }
-    sensors = { temperature: [], humidity: [] };
+    sensors = { temperature: [], humidity: [], presence: [], fire: [] };
 }
 
 // Gets from the database the info of each sensor
@@ -76,6 +76,34 @@ function getSensorsInfo() {
                 sensors.humidity.push(new Sensor(
                     newSensor.name,
                     'humidity',
+                    newSensor.available,
+                    newSensor.RPiPin,
+                    newSensor.units,
+                    newSensor.upperLimit,
+                    newSensor.lowerLimit));
+            }
+        }
+        if (sensorsConfig.presence) {
+            hideNoSensorMessage('presence');
+            for (const presenceSensorName in sensorsConfig.presence) {
+                const newSensor = sensorsConfig.presence[presenceSensorName];
+                sensors.presence.push(new Sensor(
+                    newSensor.name,
+                    'presence',
+                    newSensor.available,
+                    newSensor.RPiPin,
+                    newSensor.units,
+                    newSensor.upperLimit,
+                    newSensor.lowerLimit));
+            }
+        }
+        if (sensorsConfig.fire) {
+            hideNoSensorMessage('fire');
+            for (const fireSensorName in sensorsConfig.fire) {
+                const newSensor = sensorsConfig.fire[fireSensorName];
+                sensors.fire.push(new Sensor(
+                    newSensor.name,
+                    'fire',
                     newSensor.available,
                     newSensor.RPiPin,
                     newSensor.units,
@@ -191,8 +219,16 @@ function setUnits(sensor) {
     switch (sensor.category) {
         case 'temperature':
             return sensor.units;
+
         case 'humidity':
             return setHumidityUnits(sensor.units);
+
+        case 'presence':
+            return '';
+
+        case 'fire':
+            return '';
+
         default:
             return '';
     }
@@ -236,13 +272,12 @@ function saveNotificationsEmail() {
 
 // Set a new sensor on the db
 function addNewSensor() {
-    const sensorName = document.getElementById('inputSensorName').value;
+    const sensorName = document.getElementById('inputSensorLocation').value;
     const sensorCategory = document.getElementById('inputSensorType').value;
     const sensorLowerLimit = document.getElementById('inputSensorLowerLimit').value;
     const sensorUpperLimit = document.getElementById('inputSensorUpperLimit').value;
     const sensorRPiPin = document.getElementById('inputSensorRPiPin').value;
     const sensorUnits = setNewSensorUnits(sensorCategory);
-    console.log(sensorCategory, sensorName);
     database.ref('sensors/config/' + sensorCategory + '/' + sensorName).set({
         name: sensorName,
         RPiPin: sensorRPiPin,
@@ -285,6 +320,12 @@ function setNewSensorUnits(sensorCategory) {
 
         case 'humidity':
             return 'RH';
+
+        case 'presence':
+            return '';
+
+        case 'fire':
+            return '';
 
         default:
             break;
