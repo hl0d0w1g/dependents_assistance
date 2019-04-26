@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import sys
 import datetime
 import pyrebase
 import RPi.GPIO as GPIO
@@ -25,6 +26,8 @@ GPIO.setmode(GPIO.BCM)
 
 # Storages the sensors info
 sensors = []
+# Storages the current timestamp
+currentTimestamp = None
 
 
 class Sensor:
@@ -90,23 +93,9 @@ def setUpSensors():
             sensor.setSensor(Adafruit_DHT.DHT11)
 
         elif (sensor.getSensorCategory() in ('presence', 'fire')):
-            measure = GPIO.setup(sensor.getSensorPin(), GPIO.IN)
-
-
-def updateSensorMeasure(sensor):
-    # Updates the sensor measure
-    if (sensor.getSensorCategory() in ('temperature')):
-        _, measure = Adafruit_DHT.read_retry(
-            sensor.getSensor(), sensor.getSensorPin())
-
-    elif (sensor.getSensorCategory() in ('humidity')):
-        measure, _ = Adafruit_DHT.read_retry(
-            sensor.getSensor(), sensor.getSensorPin())
-
-    elif (sensor.getSensorCategory() in ('presence', 'fire')):
-        measure = GPIO.input(sensor.getSensorPin())
-
-    sensor.setSensorMeasure(measure)
+            sensor.setSensor(GPIO.setup(sensor.getSensorPin(), GPIO.IN))
+            GPIO.add_event_detect(
+                sensor.getSensorPin(), GPIO.RISING, callback=updateSensorMeasure(sensor))
 
 
 def checkIfSensorIsAvailable(sensor):
@@ -135,29 +124,57 @@ def calcSensorsAverage(sensor):
     return measuresSum / sensorsNumber
 
 
+def updateDataBase(sensor):
+    # Updates the database with the sensors data
+    if (checkIfSensorIsAvailable(sensor)):
+        # Push the sensor measure in the database
+        db.child('sensors/data/historyMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).push(
+            {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
+        # Set the last measured value
+        db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).set(
+            {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
+        # Set the average measured value
+        if (sensor.getSensorCategory() in ('temperature', 'humidity')):
+            db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/average').set(
+                {'measure': calcSensorsAverage(sensor), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
+
+
+def updateSensorMeasure(sensor):
+    # Updates the sensor measure
+    if (sensor.getSensorCategory() in ('temperature')):
+        _, measure = Adafruit_DHT.read_retry(
+            sensor.getSensor(), sensor.getSensorPin())
+        sensor.setSensorMeasure(measure)
+
+    elif (sensor.getSensorCategory() in ('humidity')):
+        measure, _ = Adafruit_DHT.read_retry(
+            sensor.getSensor(), sensor.getSensorPin())
+        sensor.setSensorMeasure(measure)
+
+    elif (sensor.getSensorCategory() in ('presence', 'fire')):
+        sensor.setSensorMeasure(GPIO.input(sensor.getSensorPin()))
+
+    updateDataBase(sensor)
+
+
 # Update time of the sensors in seconds
 updateTime = 60
 
 setUpSensors()
 print("The sensor controller of the Dependents Assistant app is working")
 while True:
-    # Get the current timestamp
-    currentTimestamp = datetime.datetime.fromtimestamp(
-        time.time()).strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        # Get the current timestamp
+        currentTimestamp = datetime.datetime.fromtimestamp(
+            time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
-    # Checks all sensors
-    for sensor in sensors:
-        updateSensorMeasure(sensor)
-        if (checkIfSensorIsAvailable(sensor)):
-            # Push the sensor measure in the database
-            db.child('sensors/data/historyMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).push(
-                {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
-            # Set the last measured value
-            db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).set(
-                {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
-            # Set the average measured value
-            if (sensor.getSensorCategory() in ('temperature', 'humidity')):
-                db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/average').set(
-                    {'measure': calcSensorsAverage(sensor), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
+        # Checks all sensors
+        for sensor in sensors:
+            updateSensorMeasure(sensor)
 
-    time.sleep(updateTime)
+        time.sleep(updateTime)
+
+    except KeyboardInterrupt:
+        print("The sensor controller of the Dependents Assistant app is stopping")
+        GPIO.cleanup()
+        sys.exit()
