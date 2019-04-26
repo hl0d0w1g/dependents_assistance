@@ -25,6 +25,7 @@
     "cli-color": "^1.2.0",
     "express": "^4.16.3",
     "firebase-admin": "^7.1.1",
+    "nodemailer": "^6.1.0",
     "google-assistant": "^0.2.0",
     "ip": "^1.1.5",
     "lowdb": "^1.0.0",

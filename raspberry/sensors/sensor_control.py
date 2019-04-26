@@ -26,8 +26,9 @@ GPIO.setmode(GPIO.BCM)
 
 # Storages the sensors info
 sensors = []
-# Storages the current timestamp
-currentTimestamp = None
+
+# Update time of the sensors in seconds
+updateTime = 60*15
 
 
 class Sensor:
@@ -39,6 +40,7 @@ class Sensor:
     available = False
     sensor = ''
     lastMeasure = 0
+    interrupt = None
 
     def __init__(self, category, name, units, pin):
         self.category = category
@@ -52,6 +54,10 @@ class Sensor:
 
     def setSensor(self, sensor):
         self.sensor = sensor
+
+    def setSensorInterrupt(self):
+        self.interrupt = GPIO.add_event_detect(
+            self.pin, GPIO.RISING, callback=self.event_callback)
 
     def setSensorMeasure(self, measure):
         self.lastMeasure = measure
@@ -77,6 +83,9 @@ class Sensor:
     def getSensorMeasure(self):
         return self.lastMeasure
 
+    def event_callback(self, channel):
+        updateSensorMeasure(self)
+
 
 def setUpSensors():
     # Set up and configure the sensors from the db
@@ -94,8 +103,7 @@ def setUpSensors():
 
         elif (sensor.getSensorCategory() in ('presence', 'fire')):
             sensor.setSensor(GPIO.setup(sensor.getSensorPin(), GPIO.IN))
-            GPIO.add_event_detect(
-                sensor.getSensorPin(), GPIO.RISING, callback=updateSensorMeasure(sensor))
+            sensor.setSensorInterrupt()
 
 
 def checkIfSensorIsAvailable(sensor):
@@ -119,7 +127,7 @@ def calcSensorsAverage(sensor):
     sensorsNumber = 0
     for s in sensors:
         if s.category == sensor.category:
-            measuresSum += s.measure
+            measuresSum += s.lastMeasure
             sensorsNumber += 1
     return measuresSum / sensorsNumber
 
@@ -129,14 +137,14 @@ def updateDataBase(sensor):
     if (checkIfSensorIsAvailable(sensor)):
         # Push the sensor measure in the database
         db.child('sensors/data/historyMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).push(
-            {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
+            {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': getCurrentTimestap()})
         # Set the last measured value
         db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).set(
-            {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
+            {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': getCurrentTimestap()})
         # Set the average measured value
         if (sensor.getSensorCategory() in ('temperature', 'humidity')):
             db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/average').set(
-                {'measure': calcSensorsAverage(sensor), 'units': sensor.getSensorUnits(), 'time': currentTimestamp})
+                {'measure': calcSensorsAverage(sensor), 'units': sensor.getSensorUnits(), 'time': getCurrentTimestap()})
 
 
 def updateSensorMeasure(sensor):
@@ -151,23 +159,22 @@ def updateSensorMeasure(sensor):
             sensor.getSensor(), sensor.getSensorPin())
         sensor.setSensorMeasure(measure)
 
-    elif (sensor.getSensorCategory() in ('presence', 'fire')):
+    elif (sensor.getSensorCategory() in ('fire', 'presence')):
         sensor.setSensorMeasure(GPIO.input(sensor.getSensorPin()))
 
     updateDataBase(sensor)
 
 
-# Update time of the sensors in seconds
-updateTime = 60
+def getCurrentTimestap():
+    # Get the current timestamp
+    return datetime.datetime.fromtimestamp(
+        time.time()).strftime('%Y-%m-%d %H:%M:%S')
+
 
 setUpSensors()
 print("The sensor controller of the Dependents Assistant app is working")
 while True:
     try:
-        # Get the current timestamp
-        currentTimestamp = datetime.datetime.fromtimestamp(
-            time.time()).strftime('%Y-%m-%d %H:%M:%S')
-
         # Checks all sensors
         for sensor in sensors:
             updateSensorMeasure(sensor)

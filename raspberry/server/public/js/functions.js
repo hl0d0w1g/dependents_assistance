@@ -280,11 +280,11 @@ function addNewSensor() {
     const sensorUnits = setNewSensorUnits(sensorCategory);
     database.ref('sensors/config/' + sensorCategory + '/' + sensorName).set({
         name: sensorName,
-        RPiPin: sensorRPiPin,
+        RPiPin: parseInt(sensorRPiPin),
         available: false,
         units: sensorUnits,
-        lowerLimit: sensorLowerLimit,
-        upperLimit: sensorUpperLimit
+        lowerLimit: parseInt(sensorLowerLimit),
+        upperLimit: parseInt(sensorUpperLimit)
     }, function () {
         document.getElementById('addNewSensorForm').style.display = 'none';
         document.getElementById('addSensorButton').style.display = 'flex';

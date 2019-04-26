@@ -4,8 +4,7 @@ npm install
 npm audit fix
 
 echo 'Installing sensors contoller'
-cd sensors
-bash install.sh
+bash sensors/install.sh
 
 echo 'Starting system operation'
 bash start.sh

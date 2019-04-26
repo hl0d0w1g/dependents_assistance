@@ -69,10 +69,10 @@ firebaseDB.ref('sensors/data/lastMeasurement/fire').on('child_changed', function
     const fireSensorName = snapshot.key;
     const fireSensorData = snapshot.val();
     // console.log('Fire data: ', fireSensorData, '\n');
-    if (fireSensorData.measure) {
-        console.log('ALERT: High humidity on ' + humiditySensorName + '\n');
-        sendTextInput(broadcast + 'Se ha detectado fuego en ' + humiditySensorName + ', por favor compruebelo.');
-        sendEmail('ALERTA de Fuego', 'Se ha detectado fuego en ' + humiditySensorName + ', por favor compruebelo.');
+    if (fireSensorData.measure === 1) {
+        console.log('ALERT: Fire on ' + fireSensorName + '\n');
+        sendTextInput(broadcast + 'Se ha detectado fuego en ' + fireSensorName + ', por favor compruebelo.');
+        sendEmail('ALERTA de Fuego', 'Se ha detectado fuego en ' + fireSensorName + ', por favor compruebelo.');
     }
 });
 
