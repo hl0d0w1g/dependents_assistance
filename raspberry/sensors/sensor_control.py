@@ -2,11 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import time
+import datetime
 import sys
 import datetime
 import pyrebase
 import RPi.GPIO as GPIO
 import Adafruit_DHT
+import numpy as np
+from sklearn.ensemble import IsolationForest
 
 # Set the configuration of the firebase realtime database
 firebaseConfig = {
@@ -28,7 +31,7 @@ GPIO.setmode(GPIO.BCM)
 sensors = []
 
 # Update time of the sensors in seconds
-updateTime = 60*15
+updateTime = 60*30
 
 
 class Sensor:
@@ -41,6 +44,8 @@ class Sensor:
     sensor = ''
     lastMeasure = 0
     interrupt = None
+    mlModel = None
+    outlierMeasure = False
 
     def __init__(self, category, name, units, pin):
         self.category = category
@@ -59,8 +64,14 @@ class Sensor:
         self.interrupt = GPIO.add_event_detect(
             self.pin, GPIO.RISING, callback=self.event_callback)
 
-    def setSensorMeasure(self, measure):
+    def setSensorMeasure(self, hour, measure):
+        newData = np.array([[hour, measure]])
+        self.outlierMeasure = True if (
+            self.mlModel.predict(newData)[0] == -1) else False
         self.lastMeasure = measure
+
+    def setMlModel(self, model):
+        self.mlModel = model
 
     def getSensorCategory(self):
         return self.category
@@ -82,6 +93,9 @@ class Sensor:
 
     def getSensorMeasure(self):
         return self.lastMeasure
+
+    def isOutlierMeasure(self):
+        return self.outlierMeasure
 
     def event_callback(self, channel):
         updateSensorMeasure(self)
@@ -137,14 +151,14 @@ def updateDataBase(sensor):
     if (checkIfSensorIsAvailable(sensor)):
         # Push the sensor measure in the database
         db.child('sensors/data/historyMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).push(
-            {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': getCurrentTimestap()})
+            {'measure': sensor.getSensorMeasure(), 'outlier': sensor.isOutlierMeasure(), 'units': sensor.getSensorUnits(), 'time': getCurrentTimestamp()})
         # Set the last measured value
         db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName()).set(
-            {'measure': sensor.getSensorMeasure(), 'units': sensor.getSensorUnits(), 'time': getCurrentTimestap()})
+            {'measure': sensor.getSensorMeasure(), 'outlier': sensor.isOutlierMeasure(), 'units': sensor.getSensorUnits(), 'time': getCurrentTimestamp()})
         # Set the average measured value
         if (sensor.getSensorCategory() in ('temperature', 'humidity')):
             db.child('sensors/data/lastMeasurement/' + sensor.getSensorCategory() + '/average').set(
-                {'measure': calcSensorsAverage(sensor), 'units': sensor.getSensorUnits(), 'time': getCurrentTimestap()})
+                {'measure': calcSensorsAverage(sensor), 'units': sensor.getSensorUnits(), 'time': getCurrentTimestamp()})
 
 
 def updateSensorMeasure(sensor):
@@ -152,29 +166,68 @@ def updateSensorMeasure(sensor):
     if (sensor.getSensorCategory() in ('temperature')):
         _, measure = Adafruit_DHT.read_retry(
             sensor.getSensor(), sensor.getSensorPin())
-        sensor.setSensorMeasure(measure)
+        sensor.setSensorMeasure(getCurrentTime().hour, measure)
 
     elif (sensor.getSensorCategory() in ('humidity')):
         measure, _ = Adafruit_DHT.read_retry(
             sensor.getSensor(), sensor.getSensorPin())
-        sensor.setSensorMeasure(measure)
+        sensor.setSensorMeasure(getCurrentTime().hour, measure)
 
     elif (sensor.getSensorCategory() in ('fire', 'presence')):
-        sensor.setSensorMeasure(GPIO.input(sensor.getSensorPin()))
+        sensor.setSensorMeasure(getCurrentTime().hour,
+                                GPIO.input(sensor.getSensorPin()))
 
     updateDataBase(sensor)
 
 
-def getCurrentTimestap():
+def getCurrentTime():
+    # Returns the current time
+    return datetime.datetime.today()
+
+
+def getCurrentTimestamp():
     # Get the current timestamp
     return datetime.datetime.fromtimestamp(
         time.time()).strftime('%Y-%m-%d %H:%M:%S')
+
+
+def getLastSensorMeasures(sensor):
+    # Download the last sensor measures
+    before24Hour = getCurrentTime() - datetime.timedelta(days=1)
+    data = []
+    sensorHistoryMeasurement = db
+    .child('sensors/data/historyMeasurement/' + sensor.getSensorCategory() + '/' + sensor.getSensorName())
+    .order_by_child('time')
+    .start_at(before24Hour)
+    .get()
+    .val()
+    for key, value in sensorHistoryMeasurement.items():
+        measure = value.measure
+        time = datetime.strptime(value.time, '%Y-%m-%d %H:%M:%S').hour
+        newData = [[time, measure]]
+        #newData = np.array([[time, measure]])
+        #data = np.append(data, newData)
+        data.append(newData)
+
+    data = np.array(data)
+    print(data)
+    return data
 
 
 setUpSensors()
 print("The sensor controller of the Dependents Assistant app is working")
 while True:
     try:
+        # Update ml model training once a day
+        if getCurrentTime().hour == 2:
+            for sensor in sensors:
+                if not (sensor.getSensorCategory() in ('fire')):
+                    trainData = getLastSensorMeasures(sensor)
+                    mlModel = IsolationForest(
+                        behaviour='new', contamination='auto')
+                    mlModel.fit(trainData)
+                    sensor.setMlModel(mlModel)
+
         # Checks all sensors
         for sensor in sensors:
             updateSensorMeasure(sensor)

@@ -26,6 +26,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('Check Humidity', checkHumidity);
     intentMap.set('Get Home', getHome);
     intentMap.set('Leaving Home', leavingHome);
+    intentMap.set('Emergency Type', manageEmergency);
     agent.handleRequest(intentMap);
 
     // Check the last measure of the temperature sensor on the database
@@ -73,6 +74,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     // Register in the database when the user leaves home
     function leavingHome(agent) {
         database.ref('user/state').set({ 'atHome': false });
+        agent.add(request.body.queryResult.fulfillmentText);
+    }
+
+    // Register in the database when the user leaves home
+    function manageEmergency(agent) {
+        database.ref('user/emergency').set({ 'necessary': true, 'reason': request.body.queryResult.queryText });
         agent.add(request.body.queryResult.fulfillmentText);
     }
 

@@ -22,7 +22,7 @@ let sensorsConfig;
 var mailer = nodemailer.createTransport(emailAccount);
 let destinationEmail = '';
 
-// Checks the sensors configuration
+// Checks notifications email
 firebaseDB.ref('user/notificationsEmail').on('value', function (snapshot) {
     destinationEmail = snapshot.val();
 });
@@ -45,6 +45,10 @@ firebaseDB.ref('sensors/data/lastMeasurement/temperature').on('child_changed', f
         console.log('ALERT: Low temperature\n');
         sendTextInput(broadcast + 'La temperatura en ' + temperatureSensorName + ' es demasiado baja.');
         sendEmail('ALERTA de Temperatura', 'La temperatura en ' + temperatureSensorName + ' es demasiado baja.');
+    } else if (temperatureSensorData.outlier == true) {
+        console.log('ALERT: Outlier temperature measure\n');
+        sendTextInput(broadcast + 'La temperatura en ' + temperatureSensorName + ' es anomala.');
+        sendEmail('ALERTA de Temperatura', 'La temperatura en ' + temperatureSensorName + ' es anomala. Valor: ' + temperatureSensorData.measure);
     }
 });
 
@@ -61,6 +65,10 @@ firebaseDB.ref('sensors/data/lastMeasurement/humidity').on('child_changed', func
         console.log('ALERT: Low humidity\n');
         sendTextInput(broadcast + 'La humedad en ' + humiditySensorName + ' es demasiado baja.');
         sendEmail('ALERTA de Humedad', 'La humedad en ' + humiditySensorName + ' es demasiado baja.');
+    } else if (humiditySensorData.outlier == true) {
+        console.log('ALERT: Outlier humidity measure\n');
+        sendTextInput(broadcast + 'La humedad en ' + humiditySensorName + ' es anomala.');
+        sendEmail('ALERTA de Humedad', 'La Humedad en ' + humiditySensorName + ' es anomala. Valor: ' + humiditySensorData.measure);
     }
 });
 
@@ -73,6 +81,17 @@ firebaseDB.ref('sensors/data/lastMeasurement/fire').on('child_changed', function
         console.log('ALERT: Fire on ' + fireSensorName + '\n');
         sendTextInput(broadcast + 'Se ha detectado fuego en ' + fireSensorName + ', por favor compruebelo.');
         sendEmail('ALERTA de Fuego', 'Se ha detectado fuego en ' + fireSensorName + ', por favor compruebelo.');
+    }
+});
+
+// Checks is the user needs help
+firebaseDB.ref('user/emergency').on('value', function (snapshot) {
+    emergency = snapshot.val();
+    if (emergency['necessary']) {
+        console.log('ALERT: The user notified an emergency \n');
+        sendTextInput(broadcast + 'Ya he avisado a tu contacto de emergencia.');
+        sendEmail('ALERTA emergencia', 'El usuario a solicitado ayuda por el siguiente motivo: ' + emergency['reason']);
+        firebaseDB.ref('user/emergency').set({ 'necessary': false, 'reason': '' });
     }
 });
 
