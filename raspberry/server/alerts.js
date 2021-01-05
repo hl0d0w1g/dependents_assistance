@@ -47,7 +47,7 @@ firebaseDB.ref('sensors/data/lastMeasurement/temperature').on('child_changed', f
         sendEmail('ALERTA de Temperatura', 'La temperatura en ' + temperatureSensorName + ' es demasiado baja.');
     } else if (temperatureSensorData.outlier == true) {
         console.log('ALERT: Outlier temperature measure\n');
-        sendTextInput(broadcast + 'La temperatura en ' + temperatureSensorName + ' es anomala.');
+        sendTextInput(broadcast + 'La temperatura en ' + temperatureSensorName + ' es anómala.');
         sendEmail('ALERTA de Temperatura', 'La temperatura en ' + temperatureSensorName + ' es anomala. Valor: ' + temperatureSensorData.measure);
     }
 });
@@ -89,7 +89,7 @@ firebaseDB.ref('user/emergency').on('value', function (snapshot) {
     emergency = snapshot.val();
     if (emergency['necessary']) {
         console.log('ALERT: The user notified an emergency \n');
-        sendTextInput(broadcast + 'Ya he avisado a tu contacto de emergencia.');
+        //sendTextInput(broadcast + 'Ya he avisado a tu contacto de emergencia.');
         sendEmail('ALERTA emergencia', 'El usuario a solicitado ayuda por el siguiente motivo: ' + emergency['reason']);
         firebaseDB.ref('user/emergency').set({ 'necessary': false, 'reason': '' });
     }
